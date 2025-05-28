@@ -21,9 +21,7 @@ per-users: 5609 (16.1%)
 ************************************************************************************/
 
 /**************************************************
-* new dataset: min.studypop_pre_v00
-* original dataset: min.bs_glp1_user_v03
-* description: 
+* new dataset: min.studypop_pre_v01
 **************************************************/
 
 * dataset for comorbidity at baseline;
