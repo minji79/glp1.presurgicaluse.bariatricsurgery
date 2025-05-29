@@ -221,6 +221,7 @@ proc means data=min.bmi_monthly_long noprint;
 	var bmi;
 	output out=monthly_bmi_summary
 		mean=Mean_BMI 
+  		std=SD_BMI
 		median=Median_BMI 
 		p25=Q1_BMI 
 		p75=Q3_BMI;
@@ -250,6 +251,7 @@ proc means data=bmi_monthly_long_preusers noprint;
 	var bmi;
 	output out=monthly_bmi_summary
 		mean=Mean_BMI 
+  		std=SD_BMI
 		median=Median_BMI 
 		p25=Q1_BMI 
 		p75=Q3_BMI;
@@ -279,6 +281,7 @@ proc means data=bmi_monthly_long_nousers noprint;
 	var bmi;
 	output out=monthly_bmi_summary
 		mean=Mean_BMI 
+  		std=SD_BMI
 		median=Median_BMI 
 		p25=Q1_BMI 
 		p75=Q3_BMI;
