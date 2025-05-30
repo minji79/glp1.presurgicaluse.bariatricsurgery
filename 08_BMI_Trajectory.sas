@@ -4,14 +4,16 @@
 /* bmi long data */
 * BMI of total study population overall study period | min.bs_preglp1_bmi_v03 
 * post-surgical BMI of total study population | min.postbmi_pre_studypop 
+* post-surgical BMI of total study population + 1 year window for pre-use | min.postbmi_pre_studypop2 
 
-proc contents data=min.bs_preglp1_bmi_v03; run;
+proc contents data=min.studypop_pre_v01; run;
 
 proc print data=min.bmi_monthly_long (obs=20); 
   where temporality =1;
 run;
 
-proc print data = min.bmi_studypopulation_v01 (obs = 30);
+proc print data = min.postbmi_pre_studypop2 (obs = 30);
+	where temporality = 1;
 run;
 
 * only remain post-surgical BMI;
@@ -19,7 +21,27 @@ data min.postbmi_pre_studypop;
   set min.bs_preglp1_bmi_v03;
   if bs_date <= bmi_date; 
 run;   /* 294786 obs */
-  
+
+* forming post-surgical BMI of total study population + 1 year window for pre-use;
+data preusers;
+	set min.studypop_pre_v01;
+ 	if temporality = 1 and 0 <= (bs_date - glp1_initiation_date) <= 365;
+run;
+data nonusers;
+	set min.studypop_pre_v01;
+ 	if temporality = 0;
+run;
+
+data studypop2; set preusers nonusers; run;  /* 31775 obs */
+
+proc sql;
+    create table min.postbmi_pre_studypop2 as
+    select distinct a.*
+    from min.postbmi_pre_studypop as a
+    inner join studypop2 as b
+    on a.patient_id = b.patient_id;
+quit;
+
 
 /************************************************************************************
 	 STEP 1. using monthly BMI mean
@@ -33,7 +55,7 @@ run;   /* 294786 obs */
 Proc sql;
 	Create table Bmi_after_m1 as
 	Select b.*
-	From min.postbmi_pre_studypop b
+	From min.postbmi_pre_studypop2 b
 	Where bs_date <= bmi_date and bmi_date <= bs_date +30;
 Quit;
 
@@ -43,7 +65,7 @@ Quit;
 Proc sql;
 	Create table &data as
 	Select b.*
-	From min.postbmi_pre_studypop b
+	From min.postbmi_pre_studypop2 b
 	Where &time <= bmi_date and bmi_date <= &time +30;
 Quit;
 
@@ -142,7 +164,7 @@ Proc sql;
 (b23.BMI) as BMI_m23,
 (b24.BMI) as BMI_m24
 
-	from min.postbmi_pre_studypop b
+	from min.postbmi_pre_studypop2 b
  
 Left join min.bs_preglp1_bmi_baseline b0 on b.patient_id = b0.patient_id and b.bs_date =b0.bs_date
 Left join Bmi_after_m1_avg b1 on b.patient_id =b1.patient_id and b.bs_date =b0.bs_date
